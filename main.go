@@ -34,6 +34,7 @@ func main() {
 	authController := controllers.NewAuthController()
 	profileController := controllers.NewProfileController()
 	articleController := controllers.NewArticleController()
+	commentController := controllers.NewCommentController()
 
 	// API routes
 	api := router.Group("/api")
@@ -58,6 +59,11 @@ func main() {
 		api.DELETE("/articles/:slug", middlewares.RequireAuth(), articleController.DeleteArticle)
 		api.POST("/articles/:slug/favorite", middlewares.RequireAuth(), articleController.FavoriteArticle)
 		api.DELETE("/articles/:slug/favorite", middlewares.RequireAuth(), articleController.UnfavoriteArticle)
+
+		// Comment routes
+		api.POST("/articles/:slug/comments", middlewares.RequireAuth(), commentController.AddComment)
+		api.GET("/articles/:slug/comments", commentController.GetComments)
+		api.DELETE("/articles/:slug/comments/:id", middlewares.RequireAuth(), commentController.DeleteComment)
 	}
 
 	// Chạy server

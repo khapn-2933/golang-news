@@ -123,6 +123,12 @@ Server sẽ chạy tại `http://localhost:8080`
 - `POST /api/articles/:slug/favorite` - Favorite article (cần auth)
 - `DELETE /api/articles/:slug/favorite` - Unfavorite article (cần auth)
 
+### Comments
+
+- `POST /api/articles/:slug/comments` - Thêm comment vào article (cần auth)
+- `GET /api/articles/:slug/comments` - Lấy danh sách comments của article
+- `DELETE /api/articles/:slug/comments/:id` - Xóa comment (cần auth, chỉ author mới xóa được)
+
 ## Testing API
 
 ### Đăng ký user
@@ -224,6 +230,32 @@ curl -X GET http://localhost:8080/api/articles/feed \
   -H "Authorization: Token YOUR_JWT_TOKEN"
 ```
 
+### Thêm comment vào article
+
+```bash
+curl -X POST http://localhost:8080/api/articles/how-to-build-rest-apis/comments \
+  -H "Authorization: Token YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "comment": {
+      "body": "Great article! Thanks for sharing."
+    }
+  }'
+```
+
+### Lấy danh sách comments của article
+
+```bash
+curl -X GET http://localhost:8080/api/articles/how-to-build-rest-apis/comments
+```
+
+### Xóa comment
+
+```bash
+curl -X DELETE http://localhost:8080/api/articles/how-to-build-rest-apis/comments/1 \
+  -H "Authorization: Token YOUR_JWT_TOKEN"
+```
+
 ## Database Schema
 
 Database schema được định nghĩa trong `database/migrations.sql` và sẽ tự động chạy khi khởi động MySQL container lần đầu.
@@ -232,7 +264,7 @@ Các bảng chính:
 - `users` - Thông tin người dùng
 - `follows` - Quan hệ follow giữa users
 - `articles` - Bài viết
-- `comments` - Comment trên bài viết (sẽ implement ở phase sau)
+- `comments` - Comment trên bài viết
 - `tags` - Tags
 - `article_tags` - Quan hệ many-to-many giữa articles và tags
 - `favorites` - User favorite article
