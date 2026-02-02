@@ -112,6 +112,17 @@ Server sẽ chạy tại `http://localhost:8080`
 - `POST /api/profiles/:username/follow` - Follow user (cần auth)
 - `DELETE /api/profiles/:username/follow` - Unfollow user (cần auth)
 
+### Articles
+
+- `GET /api/articles` - Lấy danh sách articles (query params: tag, author, favorited, limit, offset)
+- `GET /api/articles/feed` - Lấy articles từ users đang follow (cần auth)
+- `GET /api/articles/:slug` - Lấy article theo slug
+- `POST /api/articles` - Tạo article mới (cần auth)
+- `PUT /api/articles/:slug` - Cập nhật article (cần auth)
+- `DELETE /api/articles/:slug` - Xóa article (cần auth)
+- `POST /api/articles/:slug/favorite` - Favorite article (cần auth)
+- `DELETE /api/articles/:slug/favorite` - Unfavorite article (cần auth)
+
 ## Testing API
 
 ### Đăng ký user
@@ -161,6 +172,58 @@ curl -X POST http://localhost:8080/api/profiles/johndoe/follow \
   -H "Authorization: Token YOUR_JWT_TOKEN"
 ```
 
+### Tạo article
+
+```bash
+curl -X POST http://localhost:8080/api/articles \
+  -H "Authorization: Token YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "article": {
+      "title": "How to build REST APIs",
+      "description": "Learn how to build REST APIs with Go and Gin",
+      "body": "This is a comprehensive guide...",
+      "tagList": ["go", "gin", "rest-api"]
+    }
+  }'
+```
+
+### Lấy danh sách articles
+
+```bash
+# Lấy tất cả articles
+curl -X GET http://localhost:8080/api/articles
+
+# Lọc theo tag
+curl -X GET "http://localhost:8080/api/articles?tag=go"
+
+# Lọc theo author
+curl -X GET "http://localhost:8080/api/articles?author=johndoe"
+
+# Pagination
+curl -X GET "http://localhost:8080/api/articles?limit=10&offset=0"
+```
+
+### Lấy article theo slug
+
+```bash
+curl -X GET http://localhost:8080/api/articles/how-to-build-rest-apis
+```
+
+### Favorite article
+
+```bash
+curl -X POST http://localhost:8080/api/articles/how-to-build-rest-apis/favorite \
+  -H "Authorization: Token YOUR_JWT_TOKEN"
+```
+
+### Feed articles (từ users đang follow)
+
+```bash
+curl -X GET http://localhost:8080/api/articles/feed \
+  -H "Authorization: Token YOUR_JWT_TOKEN"
+```
+
 ## Database Schema
 
 Database schema được định nghĩa trong `database/migrations.sql` và sẽ tự động chạy khi khởi động MySQL container lần đầu.
@@ -168,11 +231,11 @@ Database schema được định nghĩa trong `database/migrations.sql` và sẽ
 Các bảng chính:
 - `users` - Thông tin người dùng
 - `follows` - Quan hệ follow giữa users
-- `articles` - Bài viết (sẽ implement ở phase sau)
+- `articles` - Bài viết
 - `comments` - Comment trên bài viết (sẽ implement ở phase sau)
-- `tags` - Tags (sẽ implement ở phase sau)
+- `tags` - Tags
 - `article_tags` - Quan hệ many-to-many giữa articles và tags
-- `favorites` - User favorite article (sẽ implement ở phase sau)
+- `favorites` - User favorite article
 
 ## Development Notes
 
@@ -180,4 +243,6 @@ Các bảng chính:
 - Sử dụng raw SQL queries (không dùng ORM)
 - JWT token có thời hạn 24 giờ
 - Error handling thống nhất theo RealWorld spec format
+- Slug tự động generate từ title và tự động update khi title thay đổi
+- Pagination mặc định: limit=20, max limit=100
 

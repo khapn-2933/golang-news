@@ -33,6 +33,7 @@ func main() {
 	// Khởi tạo controllers
 	authController := controllers.NewAuthController()
 	profileController := controllers.NewProfileController()
+	articleController := controllers.NewArticleController()
 
 	// API routes
 	api := router.Group("/api")
@@ -47,6 +48,16 @@ func main() {
 		api.GET("/profiles/:username", profileController.GetProfile)
 		api.POST("/profiles/:username/follow", middlewares.RequireAuth(), profileController.FollowUser)
 		api.DELETE("/profiles/:username/follow", middlewares.RequireAuth(), profileController.UnfollowUser)
+
+		// Article routes
+		api.GET("/articles", articleController.ListArticles)
+		api.GET("/articles/feed", middlewares.RequireAuth(), articleController.FeedArticles)
+		api.GET("/articles/:slug", articleController.GetArticle)
+		api.POST("/articles", middlewares.RequireAuth(), articleController.CreateArticle)
+		api.PUT("/articles/:slug", middlewares.RequireAuth(), articleController.UpdateArticle)
+		api.DELETE("/articles/:slug", middlewares.RequireAuth(), articleController.DeleteArticle)
+		api.POST("/articles/:slug/favorite", middlewares.RequireAuth(), articleController.FavoriteArticle)
+		api.DELETE("/articles/:slug/favorite", middlewares.RequireAuth(), articleController.UnfavoriteArticle)
 	}
 
 	// Chạy server
