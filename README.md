@@ -129,6 +129,10 @@ Server sẽ chạy tại `http://localhost:8080`
 - `GET /api/articles/:slug/comments` - Lấy danh sách comments của article
 - `DELETE /api/articles/:slug/comments/:id` - Xóa comment (cần auth, chỉ author mới xóa được)
 
+### Tags
+
+- `GET /api/tags` - Lấy tất cả tags (không cần auth)
+
 ## Testing API
 
 ### Đăng ký user
@@ -254,6 +258,12 @@ curl -X GET http://localhost:8080/api/articles/how-to-build-rest-apis/comments
 ```bash
 curl -X DELETE http://localhost:8080/api/articles/how-to-build-rest-apis/comments/1 \
   -H "Authorization: Token YOUR_JWT_TOKEN"
+```
+
+### Lấy tất cả tags
+
+```bash
+curl -X GET http://localhost:8080/api/tags
 ```
 
 ## Database Schema

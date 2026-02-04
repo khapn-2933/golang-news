@@ -35,6 +35,7 @@ func main() {
 	profileController := controllers.NewProfileController()
 	articleController := controllers.NewArticleController()
 	commentController := controllers.NewCommentController()
+	tagController := controllers.NewTagController()
 
 	// API routes
 	api := router.Group("/api")
@@ -64,6 +65,9 @@ func main() {
 		api.POST("/articles/:slug/comments", middlewares.RequireAuth(), commentController.AddComment)
 		api.GET("/articles/:slug/comments", commentController.GetComments)
 		api.DELETE("/articles/:slug/comments/:id", middlewares.RequireAuth(), commentController.DeleteComment)
+
+		// Tag routes
+		api.GET("/tags", tagController.GetTags)
 	}
 
 	// Chạy server
