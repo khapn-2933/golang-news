@@ -5,8 +5,9 @@ FROM golang:latest AS builder
 # Set working directory
 WORKDIR /app
 
-# Install git (cần cho một số dependencies)
-RUN apk add --no-cache git
+# Git đã có sẵn trong golang:latest image, không cần cài thêm
+# Nếu cần git, có thể dùng: RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+# Nhưng với Go modules hiện đại, git thường không cần thiết
 
 # Copy go mod files
 COPY go.mod go.sum ./

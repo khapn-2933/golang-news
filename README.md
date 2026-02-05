@@ -136,12 +136,34 @@ docker compose -f docker-compose.dev.yml run --rm backend go test -mod=mod ./...
 docker compose run --rm backend go test -mod=mod ./... -v -coverprofile=coverage.out
 ```
 
+### Integration Tests
+
+Chạy integration tests cho main flows:
+
+```bash
+# Development mode
+docker compose -f docker-compose.dev.yml run --rm backend go test -mod=mod ./tests/integration/... -v
+
+# Production mode
+docker compose run --rm backend go test -mod=mod ./tests/integration/... -v
+```
+
+Integration tests bao gồm:
+- ✅ **TestRegisterAndLogin** - Test flow register và login
+- ✅ **TestArticleCRUD** - Test create, read, update, delete article
+- ✅ **TestCommentFlow** - Test add, get, delete comments
+- ✅ **TestFavoriteFlow** - Test favorite và unfavorite article
+- ✅ **TestProfileFlow** - Test get profile, follow và unfollow
+
 ### Test Results Summary
 
-Kết quả test hiện tại:
+**Unit Tests:**
 - ✅ **utils**: PASS - Coverage: 86.8%
 - ✅ **middlewares**: PASS - Coverage: 93.9%
 - ✅ **services**: PASS - Coverage: 0.0% (chỉ có validation tests)
+
+**Integration Tests:**
+- ✅ **tests/integration**: PASS - Tất cả main flows đã được test
 
 ## Docker Commands
 

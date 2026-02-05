@@ -1,0 +1,179 @@
+{
+	"info": {
+		"_postman_id": "8a25e484-7827-4f0b-977c-78d1edc807b3",
+		"name": "Apis",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6854291",
+		"_collection_link": "https://blue-comet-398056.postman.co/workspace/c0de6cd7-551a-4138-ab68-5f784085a43a/collection/6854291-8a25e484-7827-4f0b-977c-78d1edc807b3?action=share&source=collection_link&creator=6854291"
+	},
+	"item": [
+		{
+			"name": "Register",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user\": {\n      \"username\": \"johndoe\",\n      \"email\": \"john@example.com\",\n      \"password\": \"password123\"\n    }\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/users",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user\": {\n        \"email\": \"john@example.com\",\n        \"password\": \"password123\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/users/login",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Current user",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{TOKEN}}"
+					}
+				],
+				"url": {
+					"raw": "{{BASE_URL}}/user",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Profile",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/profiles/johndoe",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"profiles",
+						"johndoe"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Follow user",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{TOKEN}}"
+					}
+				],
+				"url": {
+					"raw": "{{BASE_URL}}/profiles/johndoe/follow",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"profiles",
+						"johndoe",
+						"follow"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create article",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{TOKEN}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"article\": {\n      \"title\": \"How to build REST APIs\",\n      \"description\": \"Learn how to build REST APIs with Go and Gin\",\n      \"body\": \"This is a comprehensive guide...\",\n      \"tagList\": [\"go\", \"gin\", \"rest-api\"]\n    }\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/articles",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"articles"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
