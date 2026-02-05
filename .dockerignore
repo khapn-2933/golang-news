@@ -1,10 +1,10 @@
 # Binaries
+news
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-news
 
 # Test binary
 *.test
@@ -18,12 +18,9 @@ vendor/
 # Go workspace file
 go.work
 
-# Air tmp directory
-tmp/
-*.log
-
 # Environment variables
 .env
+.env.local
 
 # IDE
 .idea/
@@ -35,4 +32,18 @@ tmp/
 # OS
 .DS_Store
 Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+Dockerfile.dev
+docker-compose.yml
+docker-compose.dev.yml
+.dockerignore
+
+# Documentation
+README.md
 

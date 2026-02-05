@@ -20,82 +20,204 @@ news/
 
 ## Yêu cầu
 
-- Go 1.22
 - Docker và Docker Compose
-- MySQL (chạy qua docker-compose)
+- Không cần cài đặt Go ở local (chạy trong Docker)
 
-## Setup
+## Setup với Docker
 
-### 1. Setup Go PATH (nếu Go chưa có trong PATH)
+### Development Mode (với Hot Reload)
 
-Nếu Go chưa có trong PATH, thêm vào:
-
-```bash
-export PATH=$PATH:/home/pham.ngoc.kha@sun-asterisk.com/sdk/go1.22.0/bin
-export GOPATH=$HOME/go
-```
-
-Để thêm vĩnh viễn, thêm vào `~/.bashrc` hoặc `~/.zshrc`:
-```bash
-echo 'export PATH=$PATH:/home/pham.ngoc.kha@sun-asterisk.com/sdk/go1.22.0/bin' >> ~/.bashrc
-echo 'export GOPATH=$HOME/go' >> ~/.bashrc
-source ~/.bashrc
-```
-
-Hoặc chạy script setup:
-```bash
-./setup.sh
-```
-
-### 2. Kiểm tra Go version
+**Khuyến nghị cho development** - Tự động rebuild khi có thay đổi code:
 
 ```bash
-go version
+# Khởi động với development mode
+docker compose -f docker-compose.dev.yml up
+
+# Hoặc chạy background
+docker compose -f docker-compose.dev.yml up -d
 ```
 
-### 3. Cài đặt dependencies
+Tính năng:
+- ✅ Hot reload tự động khi bạn sửa code
+- ✅ Source code được mount vào container (không cần rebuild)
+- ✅ Sử dụng Air để watch file changes
+- ✅ Logs hiển thị real-time
+
+### Production Mode
+
+**Cho production hoặc test nhanh** - Build binary và chạy:
 
 ```bash
-go mod download
+# Khởi động production mode
+docker compose up -d
 ```
 
-Hoặc:
-```bash
-go mod tidy
-```
+Lệnh này sẽ:
+- Build Docker image cho backend (Go latest)
+- Khởi động MySQL container
+- Khởi động Backend container
+- Tự động chạy database migrations
 
-### 3. Setup environment variables
-
-Tạo file `.env` (hoặc export environment variables):
-
-```bash
-export DB_HOST=localhost
-export DB_PORT=3306
-export DB_USER=news_user
-export DB_PASSWORD=news_password
-export DB_NAME=news_db
-export JWT_SECRET=your-secret-key-change-this-in-production
-export PORT=8080
-```
-
-### 4. Khởi động MySQL với Docker Compose
+### Kiểm tra services đã chạy
 
 ```bash
-docker-compose up -d
+docker compose ps
+# hoặc
+docker compose -f docker-compose.dev.yml ps
 ```
 
-Kiểm tra MySQL đã chạy:
+Bạn sẽ thấy containers:
+- `news_mysql` / `news_mysql_dev` - MySQL database
+- `news_backend` / `news_backend_dev` - Go API server
+
+### Xem logs
+
 ```bash
-docker-compose ps
+# Development mode
+docker compose -f docker-compose.dev.yml logs -f backend
+
+# Production mode
+docker compose logs -f backend
+
+# MySQL logs
+docker compose logs -f mysql
 ```
 
-### 5. Chạy server
+### Server đã sẵn sàng
+
+Backend server sẽ chạy tại `http://localhost:8080`
+
+## Environment Variables
+
+Environment variables được định nghĩa trong `docker-compose.yml`. Bạn có thể override bằng cách tạo file `.env` hoặc sửa trực tiếp trong `docker-compose.yml`:
+
+```yaml
+environment:
+  DB_HOST: mysql
+  DB_PORT: 3306
+  DB_USER: news_user
+  DB_PASSWORD: news_password
+  DB_NAME: news_db
+  JWT_SECRET: your-secret-key-change-this-in-production
+  PORT: 8080
+```
+
+## Testing
+
+### Chạy Unit Tests trong Docker
+
+**Development mode:**
+```bash
+# Chạy tất cả tests (với -mod=mod để ignore vendor)
+docker compose -f docker-compose.dev.yml run --rm backend go test -mod=mod ./... -v
+
+# Chạy tests cho một package cụ thể
+docker compose -f docker-compose.dev.yml run --rm backend go test -mod=mod ./utils/... -v
+docker compose -f docker-compose.dev.yml run --rm backend go test -mod=mod ./middlewares/... -v
+docker compose -f docker-compose.dev.yml run --rm backend go test -mod=mod ./services/... -v
+
+# Chạy tests với coverage
+docker compose -f docker-compose.dev.yml run --rm backend go test -mod=mod ./... -cover
+```
+
+**Production mode:**
+```bash
+# Chạy tất cả tests
+docker compose run --rm backend go test -mod=mod ./... -v
+```
+
+### Chạy tests với output đẹp hơn
 
 ```bash
-go run main.go
+# Development mode
+docker compose -f docker-compose.dev.yml run --rm backend go test -mod=mod ./... -v -coverprofile=coverage.out
+
+# Production mode
+docker compose run --rm backend go test -mod=mod ./... -v -coverprofile=coverage.out
 ```
 
-Server sẽ chạy tại `http://localhost:8080`
+### Test Results Summary
+
+Kết quả test hiện tại:
+- ✅ **utils**: PASS - Coverage: 86.8%
+- ✅ **middlewares**: PASS - Coverage: 93.9%
+- ✅ **services**: PASS - Coverage: 0.0% (chỉ có validation tests)
+
+## Docker Commands
+
+### Development Mode
+
+```bash
+# Khởi động development (với hot reload)
+docker compose -f docker-compose.dev.yml up
+
+# Dừng development
+docker compose -f docker-compose.dev.yml down
+
+# Rebuild development image
+docker compose -f docker-compose.dev.yml build --no-cache
+docker compose -f docker-compose.dev.yml up -d
+```
+
+### Production Mode
+
+```bash
+# Dừng services
+docker compose down
+
+# Dừng và xóa volumes (xóa database data)
+docker compose down -v
+
+# Rebuild backend image
+docker compose build backend
+docker compose up -d
+
+# Rebuild tất cả
+docker compose build --no-cache
+docker compose up -d
+```
+
+### Vào container để debug
+
+```bash
+# Development mode
+docker compose -f docker-compose.dev.yml exec backend sh
+
+# Production mode
+docker compose exec backend sh
+
+# MySQL container
+docker compose exec mysql bash
+```
+
+## Development với Docker
+
+### Hot Reload trong Development Mode
+
+Khi chạy `docker compose -f docker-compose.dev.yml up`, Air sẽ tự động:
+- Watch các file `.go` trong project
+- Tự động rebuild khi có thay đổi
+- Restart server tự động
+- Hiển thị logs real-time
+
+Chỉ cần sửa code và save, server sẽ tự động reload!
+
+### Chạy Go commands trong container
+
+**Development mode:**
+```bash
+# Chạy go mod tidy
+docker compose -f docker-compose.dev.yml run --rm backend go mod tidy
+
+# Chạy go build
+docker compose -f docker-compose.dev.yml run --rm backend go build -o news main.go
+```
+
+**Production mode:**
+```bash
+# Chạy go mod tidy
+docker compose run --rm backend go mod tidy
+```
 
 ## API Endpoints
 
@@ -287,4 +409,53 @@ Các bảng chính:
 - Error handling thống nhất theo RealWorld spec format
 - Slug tự động generate từ title và tự động update khi title thay đổi
 - Pagination mặc định: limit=20, max limit=100
+- Tất cả được chạy trong Docker, không cần cài Go ở local
+
+## Dockerfile
+
+### Dockerfile (Production)
+- Multi-stage build:
+  - Stage 1: Build Go application với golang:latest (Go >= 1.24)
+  - Stage 2: Runtime image với alpine:latest (nhỏ gọn, ~10MB)
+- Build binary và chạy trực tiếp
+
+### Dockerfile.dev (Development)
+- Sử dụng golang:latest image
+- Cài đặt Air cho hot reload
+- Mount source code vào container
+- Tự động rebuild khi có thay đổi
+
+## Troubleshooting
+
+### Backend không kết nối được MySQL
+
+Kiểm tra:
+1. MySQL container đã chạy: `docker compose ps`
+2. Backend đợi MySQL healthy: `docker compose logs backend`
+3. DB_HOST trong docker-compose.yml phải là `mysql` (tên service)
+
+### Port 8080 đã được sử dụng
+
+Sửa port trong `docker-compose.yml`:
+```yaml
+ports:
+  - "8081:8080"  # Thay 8081 bằng port bạn muốn
+```
+
+### Rebuild sau khi thay đổi code
+
+**Development mode:** Không cần rebuild, chỉ cần save file và Air sẽ tự động reload!
+
+**Production mode:**
+```bash
+docker compose build backend
+docker compose up -d
+```
+
+### Hot reload không hoạt động
+
+Kiểm tra:
+1. Đang chạy development mode: `docker compose -f docker-compose.dev.yml up`
+2. Source code đã được mount: `docker compose -f docker-compose.dev.yml exec backend ls -la /app`
+3. Air đang chạy: `docker compose -f docker-compose.dev.yml logs backend`
 

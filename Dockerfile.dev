@@ -1,0 +1,24 @@
+# Development Dockerfile với hot reload
+FROM golang:latest
+
+# Install air cho hot reload (package mới)
+RUN go install github.com/air-verse/air@latest
+
+# Set working directory
+WORKDIR /app
+
+# Copy go mod files
+COPY go.mod go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Expose port
+EXPOSE 8080
+
+# Copy air config
+COPY .air.toml ./
+
+# Air sẽ watch và rebuild khi có thay đổi
+CMD ["air", "-c", ".air.toml"]
+

@@ -1,7 +1,9 @@
+# Docker Compose cho Development với hot reload
+# Sử dụng: docker compose -f docker-compose.dev.yml up
 services:
   mysql:
     image: mysql:8.0
-    container_name: news_mysql
+    container_name: news_mysql_dev
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: news_db
@@ -10,7 +12,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_data_dev:/var/lib/mysql
       - ./database/migrations.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
@@ -23,8 +25,8 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: news_backend
+      dockerfile: Dockerfile.dev
+    container_name: news_backend_dev
     environment:
       DB_HOST: mysql
       DB_PORT: 3306
@@ -35,15 +37,21 @@ services:
       PORT: 8080
     ports:
       - "8080:8080"
+    volumes:
+      # Mount source code để watch changes
+      - .:/app
+      # Exclude tmp và vendor để tránh conflict (chỉ exclude directories)
+      - /app/tmp
+      - /app/vendor
     depends_on:
       mysql:
         condition: service_healthy
     networks:
       - news_network
-    restart: unless-stopped
+    command: air -c .air.toml
 
 volumes:
-  mysql_data:
+  mysql_data_dev:
 
 networks:
   news_network:
